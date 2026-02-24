@@ -1,0 +1,47 @@
+<!-- templates/phishing_demo.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<section class="panel">
+  <h2>Phishing Demo (Authentication Attack)</h2>
+
+  <p>
+    This is a <strong>fake login page</strong> that imitates a secure messenger.
+    In a real phishing attack, users might think this is the real site and
+    enter their credentials, which are then stolen by the attacker.
+  </p>
+
+  <div class="fake-login">
+    <h3>Secure Messenger &ndash; Login</h3>
+    <form method="post" action="{{ url_for('phishing_demo') }}">
+      <label>
+        Username:
+        <input type="text" name="username" required>
+      </label>
+      <label>
+        Password:
+        <input type="password" name="password" required>
+      </label>
+      <button type="submit">Login</button>
+    </form>
+  </div>
+
+  {% if stolen %}
+    <section class="panel">
+      <h3>Attacker View</h3>
+      <p>
+        In a real attack, the attacker would now see the following stolen
+        credentials:
+      </p>
+      <ul>
+        <li>Username: <code>{{ stolen.username }}</code></li>
+        <li>Password: <code>{{ stolen.password }}</code></li>
+      </ul>
+      <p class="warning">
+        This demonstrates why users must always verify the URL, certificate,
+        and authenticity of the website before entering credentials.
+      </p>
+    </section>
+  {% endif %}
+</section>
+{% endblock %}

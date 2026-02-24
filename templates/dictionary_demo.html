@@ -1,0 +1,68 @@
+<!-- templates/dictionary_demo.html -->
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="panel">
+  <h2>Dictionary Attack Demo (Confidentiality)</h2>
+
+  <p>
+    This demo uses <strong>AES-CBC</strong> with a key derived from a
+    <strong>password</strong>. If the password is weak and appears in a small
+    dictionary, an attacker can recover the plaintext.
+  </p>
+
+  <form method="post" action="{{ url_for('dictionary_demo') }}">
+    <label>
+      Weak password (used by honest user):
+      <input type="text" name="weak_password" value="password123">
+    </label>
+
+    <label>
+      Secret message:
+      <input type="text" name="secret_message" value="My bank PIN is 1234.">
+    </label>
+
+    <button type="submit">Encrypt & Run Dictionary Attack</button>
+  </form>
+</section>
+
+{% if result %}
+<section class="panel">
+  <h2>Attack Result</h2>
+
+  {% if result.success %}
+    <p class="success">
+      ✅ Attack succeeded! The attacker recovered the plaintext.
+    </p>
+    <ul>
+      <li>Original password: <code>{{ result.original_password }}</code></li>
+      <li>Found password: <code>{{ result.found_password }}</code></li>
+      <li>Recovered plaintext: <code>{{ result.recovered_plaintext }}</code></li>
+    </ul>
+  {% else %}
+    <p class="error">
+      ❌ Attack failed with this small dictionary (password not found).
+    </p>
+    <ul>
+      <li>Original password: <code>{{ result.original_password }}</code></li>
+    </ul>
+  {% endif %}
+
+  <h3>Ciphertext & Parameters (Base64)</h3>
+  <ul>
+    <li>IV: <code>{{ result.iv_b64 }}</code></li>
+    <li>Salt: <code>{{ result.salt_b64 }}</code></li>
+    <li>Ciphertext: <code>{{ result.ciphertext_b64 }}</code></li>
+  </ul>
+
+  <h3>Dictionary Words Used</h3>
+  <p>
+    {% for pwd in common_passwords %}
+      <code>{{ pwd }}</code>{% if not loop.last %}, {% endif %}
+    {% endfor %}
+  </p>
+</section>
+{% endif %}
+
+{% endblock %}

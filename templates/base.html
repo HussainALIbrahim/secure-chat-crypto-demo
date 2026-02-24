@@ -1,0 +1,37 @@
+<!-- templates/base.html -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>ICS344 Secure Messenger</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <header>
+      <h1>ICS344 Secure Messenger – Project 3</h1>
+      <nav>
+        <a href="{{ url_for('index', user='Alice') }}">Home</a>
+        <a href="{{ url_for('dictionary_demo') }}">Dictionary Attack Demo</a>
+        <a href="{{ url_for('phishing_demo') }}">Phishing Demo</a>
+      </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-container">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+      <p>ICS344 – Cryptography in Action – AES-CBC + ECDH + Attacks Demo</p>
+    </footer>
+  </body>
+</html>

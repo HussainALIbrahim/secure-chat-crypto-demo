@@ -1,0 +1,135 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="panel">
+  <h2>1. Compose & Send Secure Message</h2>
+
+  <form method="post" action="{{ url_for('send_message') }}" class="form-grid">
+    <label>
+      Sender:
+      <select name="sender">
+        {% for u in users %}
+          <option value="{{ u }}" {% if u == selected_user %}selected{% endif %}>{{ u }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      Receiver:
+      <select name="receiver">
+        {% for u in users %}
+          <option value="{{ u }}">{{ u }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label class="full-width">
+      Message:
+      <textarea name="message" rows="3" placeholder="Type your message here..."></textarea>
+    </label>
+
+    <button type="submit">Encrypt & Send (AES-CBC + ECDH + HMAC)</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>2. View Inbox (Decrypted) – Acting As: {{ selected_user }}</h2>
+
+  <form method="get" action="{{ url_for('index') }}" class="inline-form">
+    <label>
+      View as:
+      <select name="user">
+        {% for u in users %}
+          <option value="{{ u }}" {% if u == selected_user %}selected{% endif %}>{{ u }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit">Switch User</button>
+  </form>
+
+  {% if decrypted_messages %}
+    <table class="messages-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Plaintext (after decrypt)</th>
+          <th>Status</th>
+          <th>Ciphertext (base64)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in decrypted_messages %}
+          <tr class="{% if m.tampered %}tampered{% else %}ok{% endif %}">
+            <td>{{ m.id }}</td>
+            <td>{{ m.sender }}</td>
+            <td>{{ m.receiver }}</td>
+            <td>{{ m.plaintext }}</td>
+            <td>{{ m.status }}</td>
+            <td class="cipher-cell">{{ m.ciphertext_b64 }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No messages yet.</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h2>3. Attacks on the App (Integrity & Availability)</h2>
+
+  <div class="attack-grid">
+    <div class="attack-card">
+      <h3>Message Injection (Integrity Attack)</h3>
+      <p>
+        Inject a fake ciphertext into a user's inbox. When they view messages,
+        the HMAC check should fail and the app will show an integrity error.
+      </p>
+      <form method="post" action="{{ url_for('attack_inject') }}">
+        <label>
+          Victim user:
+          <select name="victim">
+            {% for u in users %}
+              <option value="{{ u }}">{{ u }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <button type="submit">Inject Fake Message</button>
+      </form>
+    </div>
+
+    <div class="attack-card">
+      <h3>DoS Flood (Availability Attack)</h3>
+      <p>
+        Flood a user's inbox with many junk messages to simulate a simple
+        Denial of Service (the app has to process a lot of entries).
+      </p>
+      <form method="post" action="{{ url_for('dos_attack') }}">
+        <label>
+          Victim user:
+          <select name="victim">
+            {% for u in users %}
+              <option value="{{ u }}">{{ u }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>
+          Number of fake messages:
+          <input type="number" name="count" value="100" min="10" max="10000">
+        </label>
+        <button type="submit">Start DoS Flood</button>
+      </form>
+    </div>
+  </div>
+
+  <p>
+    For the <strong>Dictionary Attack</strong> and <strong>Phishing</strong> demos,
+    use the navigation links at the top.
+  </p>
+</section>
+
+{% endblock %}
